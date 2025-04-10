@@ -10,7 +10,7 @@ python = "^3.9"
 requests = "^2.32.3"
 beautifulsoup4 = "^4.13.3"
 python-dotenv = "^1.1.0"
-
+anthropic = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
@@ -20,3 +20,8 @@ isort = "^6.0.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-s"  # Always show print statements in test output
