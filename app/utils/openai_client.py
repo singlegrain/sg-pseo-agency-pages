@@ -147,4 +147,54 @@ class OpenAIClient:
                 "embeddings": None,
                 "model": model,
                 "error": str(e)
+            }
+
+    def generate_image(
+        self,
+        prompt: str,
+        n: int = 1,
+        size: str = "1024x1024",
+        quality: str = "standard",
+        response_format: str = "url"
+    ) -> Dict[str, Any]:
+        """Generate image(s) using DALL·E 3 via OpenAI API.
+        
+        Args:
+            prompt: The prompt to generate the image(s).
+            n: Number of images to generate (1-10).
+            size: Size of the image (e.g., '1024x1024', '1792x1024', '1024x1792').
+            quality: 'standard' or 'hd'.
+            response_format: 'url' or 'b64_json'.
+        
+        Returns:
+            Dict containing the image URLs or base64 data and metadata.
+        """
+        try:
+            response = self.client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                n=n,
+                size=size,
+                quality=quality,
+                response_format=response_format
+            )
+            # response.data is a list of Image objects with 'url' or 'b64_json' attributes
+            if response_format == "url":
+                images = [item.url for item in response.data]
+            elif response_format == "b64_json":
+                images = [item.b64_json for item in response.data]
+            else:
+                images = []
+            return {
+                "success": True,
+                "images": images,
+                "model": "dall-e-3",
+                "error": None
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "images": None,
+                "model": "dall-e-3",
+                "error": str(e)
             } 
