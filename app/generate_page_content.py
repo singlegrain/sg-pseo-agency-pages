@@ -97,7 +97,7 @@ def main():
 
     # 2. Build the single prompt for all sections
     prompt = f"""
-Here is some background information about the topic "{KEYWORD}":\n\n{knowledge_backbone}\n\nGenerate a complete service page for Single Grain, a digital marketing agency, about "{KEYWORD}".\nReturn a single JSON object with the following sections and structure (see examples):\n\n{json.dumps(EXAMPLES, indent=2)}\n\nEach section should follow the style and structure of the provided examples. Do not generate testimonials. Do not make risky or exaggerated claims.\n"""
+Here is some background information about the topic \"{KEYWORD}\":\n\n{knowledge_backbone}\n\nGenerate a complete service page for Single Grain, a digital marketing agency, about \"{KEYWORD}\".\nReturn a single JSON object with the following sections and structure (see examples):\n\n{json.dumps(EXAMPLES, indent=2)}\n\nEach section should follow the style and structure of the provided examples. Do not generate testimonials. Do not make risky or exaggerated claims.\n\nIMPORTANT: Use simple, clear language (aim for grade 11 reading level), but do not skip using marketing jargon where appropriate. Avoid typical AI cliches such as 'in today's world', 'in today's digital landscape', 'in today's fast-paced environment', and similar phrases. Do NOT wrap the JSON in a string or markdown code block. Do NOT include ```json or any markdown formatting. The output must be a valid JSON object only.\n"""
 
     # 3. Generate all sections at once using Anthropic (Claude) extended thinking
     print("Generating all sections in one call with Claude extended thinking...")
@@ -109,8 +109,13 @@ Here is some background information about the topic "{KEYWORD}":\n\n{knowledge_b
     )
     # response["response"] is the final output
     if response and "response" in response and response["response"]:
+        raw_response = response["response"].strip()
         try:
-            content = json.loads(response["response"].strip())
+            # If the model still returns a code block, strip it
+            if raw_response.startswith("```json"):
+                import re
+                raw_response = re.sub(r'^```json\\n?|```$', '', raw_response.strip(), flags=re.MULTILINE)
+            content = json.loads(raw_response)
         except Exception as e:
             content = {"error": f"Failed to parse JSON: {str(e)}", "raw": response["response"]}
     else:
