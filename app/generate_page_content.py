@@ -15,64 +15,64 @@ OUTPUT_FILE = os.path.join(OUTPUT_DIR, f"{POST_ID}.json")
 
 # --- SYSTEM PROMPT ---
 SYSTEM_PROMPT = (
-    "You are writing a service page for Single Grain, a digital marketing agency. "
-    "The content must be high quality, professional, and vanilla (no risky or exaggerated claims). "
-    "Do not make guarantees or risky promises. Maintain a confident, modern, and clear tone. "
-    "Do not generate testimonials."
+    "You are writing a service page for Single Grain, a full-service digital marketing agency. "
+    "Adopt a confident, expert yet approachable tone: frame content as a partnership (we/you), focus on clear, data-driven benefits and actionable language, and use friendly but professional voice. "
+    "Write concise, scannable copy with strong verbs and outcome-oriented statements. "
+    "Avoid AI cliches, risky promises, or guarantees, and do not generate testimonials."
 )
 
 # --- SECTION STRUCTURE & EXAMPLES ---
 EXAMPLES = {
     "hero": {
-        "headline": "Supercharge Your SEO Single Grain's AI-Powered Search Everywhere Philosophy",
-        "description": "Single Grain is an SEO Agency that helps you dominate organic visibility on every channel, from Google and Bing to TikTok and ChatGPT. We pioneer the use of cutting-edge AI and automation technologies.",
+        "headline": "Rank Higher Everywhere with Single Grain's Search Everywhere Approach",
+        "description": "We help you show up where your customers actually look—not just Google, but TikTok, Reddit, YouTube and AI chatbots. Our team builds visibility that drives real traffic and sales.",
         "cta": "Rank and Convert Everywhere"
     },
     "why_search_everywhere": {
-        "title": "Why 'Search Everywhere' is The Future of SEO",
-        "intro": "Traditional SEO is no longer enough. People don't just look for information on Google; they're discovering brands, products, and services on Amazon, searching inside TikTok, using voice assistants like Gemini, and asking AI chatbots like DeepSeek for recommendations.\n\nAt Single Grain, we're innovating and ensuring your brand is visible and optimized across all digital touchpoints, including:",
+        "title": "Why Your Brand Needs to Be Everywhere",
+        "intro": "Google isn't the only search game in town anymore. Your customers look for solutions on Amazon, scroll TikTok for recommendations, and ask AI chatbots what to buy.\n\nAt Single Grain, we make sure you show up in all these places, not just one:",
         "channels": [
             {"title": "Search Engines", "description": "Google, Bing, Yahoo, Yandex, AI Overviews"},
             {"title": "Social Platforms", "description": "Meta (Facebook/Instagram), TikTok, LinkedIn, X (Twitter), Pinterest"},
-            {"title": "AI Platforms (LLMs)", "description": "Manus, ChatGPT, Gemini, Perplexity, Claude, Grok"},
+            {"title": "AI Platforms", "description": "ChatGPT, Gemini, Perplexity, Claude, Copilot"},
             {"title": "Forums & Communities", "description": "Reddit, Quora, Stack Overflow"}
         ],
-        "mini_cta": {"title": "Ready to Elevate Your Creative? Let's Talk!", "cta": "Work With Us"}
+        "mini_cta": {"title": "Ready to be found everywhere?", "cta": "Let's Talk"}
     },
     "methodology": {
-        "title": "How We Use 'Search Everywhere' to Supercharge Your Online Presence",
-        "intro": "We don't just sprinkle keywords on a webpage. At Single Grain, Search Everywhere Optimization means embedding your brand in every corner of the digital landscape.",
+        "title": "How We Help You Show Up Everywhere",
+        "intro": "We don't just tweak title tags and call it a day. Our team builds a complete visibility plan that puts your brand in front of real buyers wherever they search.",
         "steps": [
-            {"title": "Keyword Research: The Right Keywords on the Right Platforms", "description": "We go beyond Google. Our team researches high-intent keywords and trending queries across each platform your audience uses — from traditional search engines and social platforms to AI chat tools and online communities. Especially with LLMs & AI taking a larger market share of searches each day, it's not just SEO anymore — it's search everywhere."},
-            {"title": "Competitor Research per Platform", "description": "We analyze how your top competitors perform on each channel, breaking down their keyword wins, content strategies, and share of voice. By platform-specific benchmarking, we help you spot the white space they've missed — and where you can lead."},
-            {"title": "Cross-Platform Optimizations", "description": "Once we have the data, we get to work. Whether it's rewriting AI-friendly content, optimizing social metadata, or improving E-E-A-T for search engines, we implement platform-specific improvements to increase discoverability and engagement."},
-            {"title": "Cross-Channel Promotion", "description": "Our integrated promotion strategies ensure your content gets amplified across every touchpoint. We leverage channel synergies — like turning a top-ranking blog into viral LinkedIn posts or Reddit discussions — to drive traffic from all angles."},
-            {"title": "Reporting: Curious How You Stack Up Everywhere?", "description": "Our Search Everywhere Reporting gives you a full-funnel view of your brand's visibility across search engines, social platforms, AI tools, and forums. From SEO to AI-generated responses to viral social trends, we deliver performance insights by platform and show you where to double down next."}
+            {"title": "Find Your Best Keywords Everywhere", "description": "We dig into what your customers actually type, ask, and search for on every platform—not just Google. Our team finds the high-intent keywords and questions that drive real sales, whether people are typing them into search bars or asking AI assistants."},
+            {"title": "Spot Gaps Your Competitors Missed", "description": "We track how your competitors perform across each channel, from SEO rankings to social engagement. This shows us exactly where they're weak and where you can quickly gain ground."},
+            {"title": "Optimize for Each Platform", "description": "Different platforms need different approaches. We adapt your content for search engines, social feeds, and AI systems—improving your E-E-A-T signals, optimizing metadata, and creating AI-friendly content that gets recommended."},
+            {"title": "Cross-Promote Your Wins", "description": "We turn one piece of winning content into many. Your top blog post becomes a LinkedIn carousel, a Twitter thread, and a YouTube script—reaching new audiences across platforms and building traffic from all directions."},
+            {"title": "Track What Actually Works", "description": "Our reporting shows exactly where you're gaining visibility and what's driving real traffic. You'll see how you perform across search engines, social platforms, and AI tools so you know where to focus next."}
         ],
-        "cta": {"title": "Ready to Skyrocket Your Growth?", "cta": "Work With Us"}
+        "cta": {"title": "Ready to outrank your competition?", "cta": "Get Started"}
     },
     "services_overview": {
         "title": "Our Services",
-        "description": "We offer a comprehensive suite of digital marketing services, each of our specialized solutions is designed to skyrocket your revenue and put you ahead of your competition.",
+        "description": "Our digital marketing services help you attract more visitors, convert them into leads, and turn those leads into sales.",
         "services": [
-            {"title": "Content Strategy & Optimization", "description": "Content Strategy, Research & Brief Writing, Content Writing, Content Cluster Strategy, Existing Content Optimization & Pruning, Keyword Research, SERP Analysts with Niche Expertise to Refine Search Intent, FAQs Creation"},
-            {"title": "Technical SEO", "description": "Keyword Gap Auditing, Cannibalization Analysis, NLP Optimization for AI Search"},
-            {"title": "Link Building & Off-Site SEO", "description": "Featured Snippet / AI Overviews Targeting, Guest Blogging Opportunities, Digital PR & Outreach, Competitor Link Analysis, Authority Building"},
-            {"title": "Local SEO", "description": "Google Business Profile Optimization, Local Citation Building, Local Keyword Targeting, Review Management Strategy, Local Link Building"},
-            {"title": "UX & CRO", "description": "User Experience Audits, Conversion Rate Optimization, A/B Testing Strategy, User Journey Mapping"},
-            {"title": "Reporting & Communications", "description": "Comprehensive SEO Reporting, KPI Tracking & Analysis, Regular Status Updates, Performance Insights"},
-            {"title": "Long-Term Strategy & Support", "description": "Ongoing SEO Consulting, Strategy Refinement, Quarterly Business Reviews, Market Trend Analysis"}
+            {"title": "Content Strategy & Creation", "description": "Topic research, content briefs, expert writing, topic clusters, content refreshes, SERP-focused optimization, FAQs that answer real questions"},
+            {"title": "Technical SEO", "description": "Site audits, speed optimization, keyword cannibalization fixes, schema markup, AI-friendly content structure"},
+            {"title": "Link Building & Brand Authority", "description": "Guest posting, digital PR, resource link magnets, competitor link analysis, featured snippet targeting"},
+            {"title": "Local SEO", "description": "Google Business Profile optimization, local citation building, location-focused content, review generation, local link acquisition"},
+            {"title": "UX & Conversion Optimization", "description": "User journey mapping, A/B testing, form optimization, landing page improvements, analytics implementation"},
+            {"title": "Performance Tracking", "description": "Custom dashboards, KPI monitoring, attribution reporting, competitive benchmarking, ROI analysis"},
+            {"title": "Strategic Support", "description": "Ongoing consulting, strategy updates, quarterly business reviews, market trend analysis, growth planning"}
         ]
     },
     "differentiators": [
-        {"title": "Holistic, Omni-Channel Perspective", "description": "We believe SEO should encompass all the ways customers search. Whether they type on a laptop keyboard, speak into Siri, or ask ChatGPT, your brand needs to show up—and stand out."},
-        {"title": "Data-Driven Decision Making", "description": "Our team of analysts, strategists, and AI specialists doesn't rely on guesswork. We leverage robust analytics, user behavior data, and real-time signals to identify high-impact actions."},
-        {"title": "Custom Strategy & Execution", "description": "No cookie-cutter tactics. Every brand is unique, so we tailor an in-depth plan around your specific goals, industry, and target audience—then continually refine it for maximum ROI."},
-        {"title": "Transparent Reporting & Collaboration", "description": "You always know what we're working on, how your campaigns are performing, and where new opportunities lie. We treat your brand like our own, operating as an extension of your marketing team."}
+        {"title": "We See The Whole Picture", "description": "We don't just focus on Google. We help you appear wherever your customers look—search engines, social media, voice search, or AI chatbots. This complete approach drives more traffic from more sources."},
+        {"title": "We Make Decisions Based on Data", "description": "No guesswork here. We track what works using analytics, user behavior patterns, and conversion signals. This means we put your budget where it actually drives results."},
+        {"title": "We Build Custom Strategies", "description": "Your business isn't like everyone else's, so why would your marketing be? We create plans specifically for your goals, industry, and audience—not recycled tactics from other clients."},
+        {"title": "We Work As Your Partner", "description": "We don't disappear after the kickoff call. You'll always know what we're working on, how campaigns are performing, and what's coming next. We're an extension of your team, not just a vendor."}
     ],
     "closing": {
-        "title": "Ready to Win Across Every Search Channel?",
-        "description": "If you're ready to move beyond outdated SEO tactics and start showing up where your audience actually searches, Single Grain is the partner to make it happen. While others are still focused on metadata tweaks and minor technical fixes, we're leveraging AI, automation, and platform-specific strategies to help you dominate across Google, TikTok, YouTube, Reddit, and beyond. Let's future-proof your visibility - everywhere search happens.",
+        "title": "Ready to Be Found Everywhere?",
+        "description": "Stop limiting yourself to Google. Your customers are searching everywhere, and you need to be there too. While your competitors focus on basic SEO tweaks, we'll help you build visibility across Google, TikTok, YouTube, Reddit and AI platforms. Let's get you in front of more buyers, wherever they're looking.",
         "cta": "Boost Rankings & Revenue"
     }
 }
