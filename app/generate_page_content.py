@@ -115,10 +115,18 @@ AVAILABLE_FONT_AWESOME_ICONS = [
 ]
 
 # --- CONFIG ---
-KEYWORD = "marketing automation agency"
-POST_ID = "46561"
+KEYWORDS_POSTS = [
+    {"keyword": "lead generation agency for crypto", "post_id": "53299"},
+    {"keyword": "youtube growth agency", "post_id": "58099"},
+    {"keyword": "reddit marketing agency", "post_id": "46579"},
+    {"keyword": "pay per lead agency", "post_id": "46592"},
+    {"keyword": "youtube channel management agency", "post_id": "58241"},
+    {"keyword": "twitch promotion services", "post_id": "58006"},
+    {"keyword": "short form video agency", "post_id": "50315"},
+    {"keyword": "youtube consulting", "post_id": "55719"},
+    {"keyword": "ai content agency", "post_id": "54911"},
+]
 OUTPUT_DIR = "output"
-OUTPUT_FILE = os.path.join(OUTPUT_DIR, f"{POST_ID}.json")
 
 # --- SYSTEM PROMPT ---
 SYSTEM_PROMPT = (
@@ -244,14 +252,14 @@ EXAMPLES = {
 }
 
 # --- MAIN GENERATION LOGIC ---
-def main():
+def generate_page_content(keyword, post_id):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     p_client = PerplexityClient()
     a_client = AnthropicClient()
 
     # 1. Get knowledge backbone for the keyword
-    print(f"Getting knowledge backbone for '{KEYWORD}'...")
-    research_prompt = RESEARCH_PROMPT.format(keyword=KEYWORD)
+    print(f"Getting knowledge backbone for '{keyword}'...")
+    research_prompt = RESEARCH_PROMPT.format(keyword=keyword)
     kb_result = p_client.query_with_search(
         prompt=research_prompt,
         system_prompt=None,
@@ -264,8 +272,8 @@ def main():
 
     # 2. Build the single prompt for all sections
     prompt = f"""
-Here is some background information about the topic \"{KEYWORD}\":\n\n```{knowledge_backbone}```\n\n
-Generate a complete service page for Single Grain about \"{KEYWORD}\" using THE EXACT STRUCTURE AND FORMATTING shown in the example below. Your task is to fill in the blanks with new content while keeping ALL formatting elements intact.\n\n{json.dumps(EXAMPLES, indent=2)}\n\n
+Here is some background information about the topic \"{keyword}\":\n\n```{knowledge_backbone}```\n\n
+Generate a complete service page for Single Grain about \"{keyword}\" using THE EXACT STRUCTURE AND FORMATTING shown in the example below. Your task is to fill in the blanks with new content while keeping ALL formatting elements intact.\n\n{json.dumps(EXAMPLES, indent=2)}\n\n
 CRITICAL INSTRUCTIONS:
 1. Treat the example as an exact template - copy ALL HTML tags (<span>, <strong>, <p>, etc.) exactly as shown
 2. Match the exact writing style, sentence structure and length for each section
@@ -285,7 +293,7 @@ Assign an appropriate icon from the list to each highlight based on its content 
 Use simple, clear language (grade 10-11 reading level) with marketing terminology where appropriate. Avoid AI cliches like 'in today's world', 'digital landscape', 'fast-paced environment'. DO NOT include testimonials or make risky claims.\n"""
 
     # 3. Generate all sections at once using Anthropic (Claude) extended thinking
-    print("Generating all sections in one call with Claude extended thinking...")
+    print(f"Generating all sections in one call with Claude extended thinking for '{keyword}'...")
     response = a_client.query_with_extended_thinking(
         prompt=prompt,
         system_prompt=SYSTEM_PROMPT,
@@ -326,9 +334,19 @@ Use simple, clear language (grade 10-11 reading level) with marketing terminolog
         content = {"error": f"[Error generating content: {response}]"}
 
     # 4. Save output
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        json.dump({"keyword": KEYWORD, "knowledge_backbone": knowledge_backbone, "content": content}, f, indent=2, ensure_ascii=False)
-    print(f"Content for post {POST_ID} written to {OUTPUT_FILE}")
+    output_file = os.path.join(OUTPUT_DIR, f"{post_id}.json")
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump({"keyword": keyword, "knowledge_backbone": knowledge_backbone, "content": content}, f, indent=2, ensure_ascii=False)
+    print(f"Content for post {post_id} written to {output_file}")
+
+def main():
+    for item in KEYWORDS_POSTS:
+        keyword = item["keyword"]
+        post_id = item["post_id"]
+        try:
+            generate_page_content(keyword, post_id)
+        except Exception as e:
+            print(f"Error processing '{keyword}' (post_id: {post_id}): {e}")
 
 if __name__ == "__main__":
     main()
