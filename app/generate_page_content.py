@@ -118,9 +118,6 @@ AVAILABLE_FONT_AWESOME_ICONS = [
 KEYWORDS_POSTS = [
     {"keyword": "adtech consulting agency", "post_id": "56767"},
     {"keyword": "affiliate marketing management agency", "post_id": "57583"},
-    {"keyword": "agencia de contenidos ai agency", "post_id": "65466"},
-    {"keyword": "agencia de gestion de canales de youtube agency", "post_id": "65464"},
-    {"keyword": "agencia de marketing reddit agency", "post_id": "65516"},
     {"keyword": "ai acquisition agency", "post_id": "60003"},
     {"keyword": "ai business consulting/l/san francisco", "post_id": "51536"},
     {"keyword": "ai chatbot agency", "post_id": "56758"},
