@@ -117,14 +117,40 @@ AVAILABLE_FONT_AWESOME_ICONS = [
 # --- CONFIG ---
 KEYWORDS_POSTS = [
     {"keyword": "lead generation agency for crypto", "post_id": "53299"},
-    {"keyword": "youtube growth agency", "post_id": "58099"},
     {"keyword": "reddit marketing agency", "post_id": "46579"},
     {"keyword": "pay per lead agency", "post_id": "46592"},
+    {"keyword": "youtube growth agency", "post_id": "58099"},
+    {"keyword": "youtube consulting agency", "post_id": "55719"},
     {"keyword": "youtube channel management agency", "post_id": "58241"},
-    {"keyword": "twitch promotion services", "post_id": "58006"},
+    {"keyword": "twitch promotion services agency", "post_id": "58006"},
     {"keyword": "short form video agency", "post_id": "50315"},
-    {"keyword": "youtube consulting", "post_id": "55719"},
     {"keyword": "ai content agency", "post_id": "54911"},
+    {"keyword": "brand collaboration agency", "post_id": "57319"},
+    {"keyword": "ai media buying agency", "post_id": "60122"},
+    {"keyword": "linkedin management agency", "post_id": "46612"},
+    {"keyword": "performance based marketing agency", "post_id": "56242"},
+    {"keyword": "content repurposing agency", "post_id": "50319"},
+    {"keyword": "programmatic seo agency", "post_id": "47607"},
+    {"keyword": "sustainable marketing services agency", "post_id": "57310"},
+    {"keyword": "photography advertising agency", "post_id": "57669"},
+    {"keyword": "discord management agency", "post_id": "58272"},
+    {"keyword": "link building services agency", "post_id": "46324"},
+    {"keyword": "guest post link building service agency", "post_id": "46461"},
+    {"keyword": "twitter management agency", "post_id": "46503"},
+    {"keyword": "google my business agency", "post_id": "56365"},
+    {"keyword": "ai acquisition agency", "post_id": "60003"},
+    {"keyword": "omnichannel marketing agency", "post_id": "46528"},
+    {"keyword": "whatsapp marketing agency", "post_id": "57890"},
+    {"keyword": "go to market strategy agency", "post_id": "50337"},
+    {"keyword": "edtech marketing agency", "post_id": "55937"},
+    {"keyword": "tiktok growth services agency", "post_id": "61243"},
+    {"keyword": "ai instagram services agency", "post_id": "60029"},
+    {"keyword": "ai influencer agency", "post_id": "59840"},
+    {"keyword": "nutritionist marketing agency", "post_id": "57824"},
+    {"keyword": "crypto twitter marketing agency", "post_id": "58266"},
+    {"keyword": "whatsapp business consulting agency", "post_id": "57767"},
+    {"keyword": "user retention agency", "post_id": "50331"},
+    {"keyword": "podcast growth agency", "post_id": "58309"},
 ]
 OUTPUT_DIR = "output"
 
@@ -343,6 +369,10 @@ def main():
     for item in KEYWORDS_POSTS:
         keyword = item["keyword"]
         post_id = item["post_id"]
+        output_file = os.path.join(OUTPUT_DIR, f"{post_id}.json")
+        if os.path.exists(output_file):
+            print(f"Skipping {keyword} (post_id: {post_id}) - output already exists.")
+            continue
         try:
             generate_page_content(keyword, post_id)
         except Exception as e:

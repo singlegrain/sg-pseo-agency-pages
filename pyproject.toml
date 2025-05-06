@@ -12,6 +12,8 @@ beautifulsoup4 = "^4.13.3"
 python-dotenv = "^1.1.0"
 anthropic = "*"
 openai = "^1.72.0"
+pandas = "^2.2.3"
+lxml = "^5.4.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
