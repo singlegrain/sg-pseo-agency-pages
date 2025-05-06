@@ -16,7 +16,7 @@ def extract_post_id(html):
     if not body or not body.has_attr('class'):
         return None
     for cls in body['class']:
-        m = re.match(r'postid-(\d+)', cls)
+        m = re.match(r'(?:postid|page-id)-(\d+)', cls)
         if m:
             return m.group(1)
     return None
