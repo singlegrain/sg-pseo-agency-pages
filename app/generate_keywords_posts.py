@@ -30,7 +30,8 @@ def extract_keyword(url):
         return None
     slug = segments[-1]
     keyword = unquote(slug.replace('-', ' ').replace('_', ' '))
-    if 'agency' in path and 'agency' not in keyword:
+    # Only append ' agency' if the keyword is in English (does not contain 'agencia')
+    if 'agency' in path and 'agency' not in keyword and 'agencia' not in keyword.lower():
         keyword += ' agency'
     return keyword
 
