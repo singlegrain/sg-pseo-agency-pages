@@ -5,9 +5,95 @@ from dotenv import load_dotenv
 from collections import defaultdict
 from app.utils.perplexity_client import PerplexityClient
 from app.utils.anthropic_client import AnthropicClient
+from app.utils.openai_client import OpenAIClient
 
 # Load environment variables
 load_dotenv()
+
+# Helper function to guess if a keyword is Spanish
+def is_spanish(keyword: str, openai_client: OpenAIClient) -> bool:
+    """
+    Heuristic to guess if a keyword is in Spanish.
+    1. Checks for Spanish-specific characters.
+    2. Checks for high-confidence Spanish phrases.
+    3. If inconclusive, queries OpenAI LLM for language identification.
+    4. Falls back to other indicative phrases and general heuristics if LLM fails.
+    """
+    keyword_lower = keyword.lower()
+
+    # 1. Check for Spanish-specific characters (strongest indicator)
+    spanish_chars = ['ñ', 'á', 'é', 'í', 'ó', 'ú', 'ü']
+    if any(char in keyword_lower for char in spanish_chars):
+        print(f"[is_spanish_heuristic] Spanish char detected in '{keyword}'. Result: True")
+        return True
+    
+    # 2. Check for high-confidence Spanish phrases (strong indicators)
+    high_confidence_spanish_phrases = [
+        'agencia de',  # e.g., "agencia de marketing"
+        'servicios de' # e.g., "servicios de seo"
+    ]
+    # Also check for "agencia" as a whole word
+    if re.search(r'\\bagencia\\b', keyword_lower) or any(phrase in keyword_lower for phrase in high_confidence_spanish_phrases):
+        print(f"[is_spanish_heuristic] High-confidence phrase detected in '{keyword}'. Result: True")
+        return True
+        
+    # --- LLM Check (if strong heuristics above are not conclusive) ---
+    # Only use LLM for keywords that are not trivially short.
+    if len(keyword_lower.split()) > 1 or len(keyword_lower) > 10: # Heuristic for when to use LLM
+        print(f"[is_spanish_llm] Strong heuristics inconclusive for '{keyword}'. Querying LLM...")
+        try:
+            prompt_messages = [
+                {"role": "system", "content": "You are a language identification assistant. Analyze the provided keyword phrase. Respond with only 'yes' if the keyword is primarily in Spanish, or 'no' if it is primarily in another language or undecipherable. Do not provide any explanation or other text."},
+                {"role": "user", "content": f"Is the following keyword phrase primarily in Spanish? Keyword: \"{keyword}\""}
+            ]
+            response = openai_client.chat(
+                messages=prompt_messages,
+                model="gpt-4o-mini", # Using gpt-4o-mini as requested
+                max_tokens=5,
+                temperature=0.0 
+            )
+            if response["success"] and response["content"]:
+                llm_answer = response["content"].strip().lower()
+                print(f"[is_spanish_llm] LLM response for '{keyword}': '{llm_answer}'")
+                if llm_answer == "yes":
+                    return True
+                if llm_answer == "no":
+                    # If LLM confidently says "no", we trust it over weaker heuristics
+                    print(f"[is_spanish_llm] LLM determined '{keyword}' is not Spanish. Result: False")
+                    return False
+                # If LLM response is ambiguous (not "yes" or "no"), fall through to weaker heuristics
+                print(f"[is_spanish_llm] LLM response ambiguous for '{keyword}'. Falling back to heuristics.")
+            else:
+                print(f"[is_spanish_llm] LLM query failed or no content for '{keyword}'. Error: {response.get('error')}. Falling back to heuristics.")
+        except Exception as e:
+            print(f"[is_spanish_llm] Exception during LLM query for '{keyword}': {e}. Falling back to heuristics.")
+    else:
+        print(f"[is_spanish_llm] Skipping LLM for very short/simple keyword: '{keyword}'")
+
+    # 3. Check for other reasonably indicative Spanish phrases (if LLM didn't provide a conclusive 'yes' or 'no')
+    other_spanish_phrases = [
+        'consultoría en', 'marketing en español', 'marketing digital',
+        'para empresas', 'optimización para motores de búsqueda', 'publicidad en línea',
+        'estrategias de', 'creación de contenido', 'posicionamiento web', 'gestión de redes sociales'
+    ]
+    if any(phrase in keyword_lower for phrase in other_spanish_phrases):
+        print(f"[is_spanish_heuristic] Other indicative phrase detected in '{keyword}'. Result: True")
+        return True
+    
+    # 4. General heuristic: common Spanish articles/prepositions + common Spanish suffixes
+    # Applied to longer keywords to reduce ambiguity with other Romance languages.
+    if len(keyword_lower.split()) > 2: 
+        spanish_articles_prepositions_pattern = r'\\b(el|la|los|las|de|en|para|con|una|uno|unos|unas|al|del)\\b'
+        common_spanish_suffixes = ['ción', 'dad', 'tad', 'miento', 'ncia', 'ico', 'ica', 'oso', 'osa', 'ante', 'ente', 'ista']
+        has_article_prep = re.search(spanish_articles_prepositions_pattern, keyword_lower)
+        has_specific_prep_spacing = any(prep in keyword_lower for prep in [' de ', ' en ', ' para ', ' con ', ' al ', ' del '])
+        has_suffix = any(suffix in keyword_lower for suffix in common_spanish_suffixes)
+        if has_article_prep and (has_specific_prep_spacing or has_suffix):
+            print(f"[is_spanish_heuristic] General heuristic (articles/suffixes) matched for '{keyword}'. Result: True")
+            return True
+            
+    print(f"[is_spanish_final] No Spanish indicators (heuristic or LLM) found for '{keyword}'. Result: False")
+    return False
 
 # --- ICON MAPPING ---
 # Font Awesome icon mapping for highlight categories
@@ -200,19 +286,34 @@ KEYWORDS_POSTS = [
 ]
 OUTPUT_DIR = "output"
 
-# --- SYSTEM PROMPT ---
-SYSTEM_PROMPT = (
+# --- SYSTEM PROMPT (ENGLISH) ---
+SYSTEM_PROMPT_EN = (
     "You are writing a service page for Single Grain, a full-service digital marketing agency. "
     "Adopt a confident, expert yet approachable tone: frame content as a partnership (we/you), focus on clear, data-driven benefits and actionable language, and use friendly but professional voice. "
     "Write concise, scannable copy with strong verbs and outcome-oriented statements. "
     "Avoid AI cliches, risky promises, or guarantees, and do not generate testimonials."
 )
 
-# --- RESEARCH PROMPT ---
-RESEARCH_PROMPT = (
+# --- SYSTEM PROMPT (SPANISH) ---
+SYSTEM_PROMPT_ES = (
+    "Estás escribiendo una página de servicio para Single Grain, una agencia de marketing digital de servicio completo. "
+    "Adopta un tono seguro, experto pero accesible: enmarca el contenido como una asociación (nosotros/tú), enfócate en beneficios claros basados en datos y lenguaje accionable, y usa una voz amigable pero profesional. "
+    "Escribe un texto conciso y escaneable con verbos fuertes y declaraciones orientadas a resultados. "
+    "Evita los clichés de la IA, las promesas arriesgadas o las garantías, y no generes testimonios."
+)
+
+# --- RESEARCH PROMPT (ENGLISH) ---
+RESEARCH_PROMPT_EN = (
     "Research and summarize the most important, up-to-date facts, trends, challenges, and opportunities about the topic: '{keyword}'. "
     "Focus on actionable insights, statistics, and current best practices relevant to digital marketing decision makers. "
     "Do not generate marketing copy, sales language, or brand-specific content."
+)
+
+# --- RESEARCH PROMPT (SPANISH) ---
+RESEARCH_PROMPT_ES = (
+    "Investiga y resume los hechos, tendencias, desafíos y oportunidades más importantes y actualizados sobre el tema: '{keyword}'. "
+    "Enfócate en ideas accionables, estadísticas y mejores prácticas actuales relevantes para los tomadores de decisiones de marketing digital. "
+    "No generes texto de marketing, lenguaje de ventas o contenido específico de marca. LA INVESTIGACIÓN Y EL RESUMEN DEBEN ESTAR EN ESPAÑOL."
 )
 
 # --- SECTION STRUCTURE & EXAMPLES ---
@@ -328,32 +429,50 @@ def generate_page_content(keyword, post_id):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     p_client = PerplexityClient()
     a_client = AnthropicClient()
+    oai_client = OpenAIClient()
 
+    language_is_spanish = is_spanish(keyword, oai_client)
+    target_language_name = "Spanish" if language_is_spanish else "English"
+
+    current_system_prompt = SYSTEM_PROMPT_ES if language_is_spanish else SYSTEM_PROMPT_EN
+    current_research_prompt_template = RESEARCH_PROMPT_ES if language_is_spanish else RESEARCH_PROMPT_EN
+    
     # 1. Get knowledge backbone for the keyword
-    print(f"Getting knowledge backbone for '{keyword}'...")
-    research_prompt = RESEARCH_PROMPT.format(keyword=keyword)
+    print(f"Getting knowledge backbone for '{keyword}' (in {target_language_name})...")
+    research_prompt = current_research_prompt_template.format(keyword=keyword)
     kb_result = p_client.query_with_search(
         prompt=research_prompt,
-        system_prompt=None,
+        system_prompt=None, # Perplexity system prompt is usually not needed for research queries
         search_context_size="high",
-        max_tokens=1000
+        max_tokens=1000 # Adjust if necessary for different languages
     )
     if not kb_result["success"] or not kb_result["content"]:
         raise RuntimeError(f"Failed to get knowledge backbone: {kb_result.get('error')}")
     knowledge_backbone = kb_result["content"].strip()
 
-    # 2. Build the single prompt for all sections
-    prompt = f"""
-Here is some background information about the topic \"{keyword}\":\n\n```{knowledge_backbone}```\n\n
-Generate a complete service page for Single Grain about \"{keyword}\" using THE EXACT STRUCTURE AND FORMATTING shown in the example below. Your task is to fill in the blanks with new content while keeping ALL formatting elements intact.\n\n{json.dumps(EXAMPLES, indent=2)}\n\n
-CRITICAL INSTRUCTIONS:
-1. Treat the example as an exact template - copy ALL HTML tags (<span>, <strong>, <p>, etc.) exactly as shown
-2. Match the exact writing style, sentence structure and length for each section
-3. Maintain the same level of detail in each section as shown in the example
-4. Keep all bullet formats and list structures exactly as demonstrated
-5. Keep the same formatting for CTAs, headlines, and descriptive text
-6. Preserve all special text formatting shown (bold, spans with classes, paragraph tags)
-7. Your output must be valid JSON with no markdown formatting or code blocks
+    # 2. Build the single prompt for all sections for Anthropic
+    language_instructions_for_anthropic = f"""
+IMPORTANT LANGUAGE INSTRUCTIONS:
+- The keyword for this page is: \"{keyword}\".
+- Based on this keyword, the target language for ALL generated textual content is: {target_language_name}.
+- The 'EXAMPLES' provided below are in English. You MUST use these examples ONLY for their JSON structure, HTML tags, and overall formatting.
+- DO NOT use the English text from the EXAMPLES directly. Instead, you must generate NEW, ORIGINAL content in {target_language_name} that fits the purpose and style of each section, relevant to the keyword \"{keyword}\".
+- The 'knowledge_backbone' provided below is already in {target_language_name}. Use this information to inform your {target_language_name} content generation.
+- Ensure all textual parts of your JSON output (headlines, descriptions, list items, CTAs, etc.) are in {target_language_name}.
+"""
+
+    prompt = f"""{language_instructions_for_anthropic}
+
+Here is some background information about the topic \"{keyword}\" (this information is in {target_language_name}):\n\n```{knowledge_backbone}```\n\n
+Generate a complete service page for Single Grain about \"{keyword}\" using THE EXACT STRUCTURE AND FORMATTING shown in the example below. Your task is to fill in the blanks with new content (in {target_language_name}) while keeping ALL formatting elements (HTML tags, JSON structure) intact.\n\n{json.dumps(EXAMPLES, indent=2)}\n\n
+CRITICAL INSTRUCTIONS (in addition to the language instructions above):
+1. Treat the example as an exact template - copy ALL HTML tags (<span>, <strong>, <p>, etc.) exactly as shown. The TEXT content within these tags should be in {target_language_name}.
+2. Match the exact writing style (adapted to {target_language_name}), sentence structure, and length for each section, as inspired by the English examples but created newly in {target_language_name}.
+3. Maintain the same level of detail in each section as shown in the example, translated and adapted to {target_language_name}.
+4. Keep all bullet formats and list structures exactly as demonstrated.
+5. Keep the same formatting for CTAs, headlines, and descriptive text (text content in {target_language_name}).
+6. Preserve all special text formatting shown (bold, spans with classes, paragraph tags).
+7. Your output must be valid JSON with no markdown formatting or code blocks.
 8. DO NOT wrap your response in ```json code blocks. Just return a raw JSON object.
 
 ICON SELECTION:
@@ -362,14 +481,14 @@ For the "highlights" section in "why_us", choose appropriate Font Awesome icons 
 
 Assign an appropriate icon from the list to each highlight based on its content and theme.
 
-Use simple, clear language (grade 10-11 reading level) with marketing terminology where appropriate. Avoid AI cliches like 'in today's world', 'digital landscape', 'fast-paced environment'. DO NOT include testimonials or make risky claims.\n"""
+Use simple, clear language (grade 10-11 reading level, adapted to {target_language_name}) with marketing terminology where appropriate. Avoid AI cliches like 'in today's world', 'digital landscape', 'fast-paced environment' (or their {target_language_name} equivalents). DO NOT include testimonials or make risky claims.\n"""
 
     # 3. Generate all sections at once using Anthropic (Claude) extended thinking
-    print(f"Generating all sections in one call with Claude extended thinking for '{keyword}'...")
+    print(f"Generating all sections in one call with Claude extended thinking for '{keyword}' (in {target_language_name})...")
     response = a_client.query_with_extended_thinking(
         prompt=prompt,
-        system_prompt=SYSTEM_PROMPT,
-        max_tokens=6000,
+        system_prompt=current_system_prompt,
+        max_tokens=6000, # Consider if this needs adjustment for Spanish (often longer)
         thinking_budget=3000
     )
     # response["response"] is the final output
