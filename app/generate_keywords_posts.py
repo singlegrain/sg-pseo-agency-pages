@@ -35,12 +35,11 @@ def extract_keyword(url):
         keyword += ' agency'
     return keyword
 
-# Read CSV and filter
+# Read CSV and loop through all URLs
 pages = pd.read_csv(CSV_PATH)
-filtered = pages[pages['Clicks'] >= 2]
 
 results = []
-for url in filtered['Top pages']:
+for url in pages['url']:
     try:
         resp = requests.get(url, timeout=10)
         resp.raise_for_status()
